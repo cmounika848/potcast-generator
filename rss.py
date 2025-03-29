@@ -9,7 +9,17 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from requests.exceptions import RequestException
 import time
+import base64
 
+def atob(data: str) -> str:
+    """Decode a base64 encoded string."""
+    try:
+        # Decode the base64 string and return the decoded content
+        return base64.b64decode(data).decode('utf-8', errors='replace')
+    except Exception as e:
+        print(f"Error decoding base64 data: {e}")
+        return data
+    
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,6 +31,26 @@ URLs = {
     "https://politepol.com/fd/DcNWUYWHMmaS.xml"
 }
 
+
+# get the data from github repository
+def get_data_from_github(url: str) -> Optional[Dict[str, Any]]:
+    try:
+        # Set the Headers and get the sha
+        headers= {
+                                'Authorization': 'token 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'
+                            }
+
+        response = requests.get(url, headers=headers)
+        response = response.json()
+
+        return json.loads(atob(response['content']))
+    except RequestException as e:
+        logger.error(f"Error fetching data from GitHub: {e}")
+        return None
+
+applied = get_data_from_github("https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json")
+
+print("Applied Jobs:", len(applied))
 allData = None
 # Define the RSS feed URL
 for each in URLs:
@@ -77,6 +107,12 @@ for each in URLs:
     
     for article in data:
         link = article["link"]
+        # link is in applied skip
+        #print(f"Checking {link}")
+        #print(f"Already applied for {applied}")
+        if link in applied:
+            #print(f"Already applied for {link}")
+            continue
         time.sleep(2)  # Sleep for 2 seconds between requests to avoid overwhelming the server
         res = requests.get(link)
         # After 5 articles exit the loop
@@ -168,10 +204,80 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                 th {
                     background-color: #f2f2f2;
                 }
+                button {
+                    margin: 10px 0;
+                    padding: 10px 20px;
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    cursor: pointer;
+                }
+                button:hover {
+                    background-color: #45a049;
+                }
             </style>
+            <script>
+                async function updateVisitedLinks() {
+                    try {
+                       
+                        const links = document.querySelectorAll('a');
+                        const visitedLinks = Array.from(links)
+                            .filter(link => link.innerText === 'Visited')
+                            .map(link => link.href);
+                        
+                        // Skip if no links are marked as visited
+                        if (visitedLinks.length === 0) {
+                            alert('No links are marked as visited.');
+                            return;
+                        }
+
+                        // Fetch the SHA of the file from GitHub
+                        const shaResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
+                            headers: {
+                                'Authorization': 'token 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'
+                            }
+                        });
+                        if (!shaResponse.ok) {
+                            alert('Failed to fetch SHA of the file.');
+                            return;
+                        }
+                        const shaData = await shaResponse.json();
+                        
+                        const appliedLinks = JSON.parse(atob(shaData.content));
+                        const fileSha = shaData.sha;
+
+                        // Update the applied links on GitHub
+                        let updatedLinks = [...new Set([...visitedLinks, ...appliedLinks])];
+                        //remove duplicates for updated links
+                        updatedLinks = [...new Set(updatedLinks)];
+        
+                        const updateResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': 'token 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',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: 'Update applied links',
+                                content: btoa(JSON.stringify(updatedLinks)),
+                                sha: fileSha
+                            })
+                        });
+                        if (updateResponse.ok) {
+                            alert('Visited links updated successfully!');
+                        } else {
+                            alert('Failed to update visited links on GitHub.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating visited links:', error);
+                        alert('An error occurred while updating visited links.');
+                    }
+                }
+            </script>
         </head>
         <body>
-            <h1>Latest Remote Jobs: .NET)</h1>
+            <h1>Latest Remote Jobs: .NET</h1>
+            <button onclick="updateVisitedLinks()">Update Visited Links</button>
             <table>
                 <tr>
                     <th>S.No</th>
