@@ -137,8 +137,9 @@ for each in URLs:
                 #data.remove(article)
         else:
             print(f"Failed to fetch article from {link}, status code: {res.status_code}")
+        print(f"Catured jobs so far: {len(filtered_data)}")
 
-print("Filtered data:", len(filtered_data))
+print("Filtered Jobs:", len(filtered_data))
     # Remove duplicates based on the 'link' field
 unique_links = set()
 filtered_data = [article for article in filtered_data if article["link"] not in unique_links and not unique_links.add(article["link"])]
@@ -170,7 +171,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
             </style>
         </head>
         <body>
-            <h1>Latest Remote Jobs: .NET </h1>
+            <h1>Latest Remote Jobs: .NET)</h1>
             <table>
                 <tr>
                     <th>S.No</th>
