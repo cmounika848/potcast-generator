@@ -17,7 +17,8 @@ filtered_data = []
 # Set array of URLs
 URLs = {
     "https://politepol.com/fd/V5buPLaIoQot.xml",
-    "https://politepol.com/fd/uNTJ4RCbv385.xml"
+    "https://politepol.com/fd/uNTJ4RCbv385.xml",
+    "https://politepol.com/fd/DcNWUYWHMmaS.xml"
 }
 
 allData = None
