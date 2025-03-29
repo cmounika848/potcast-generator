@@ -150,7 +150,7 @@ filtered_data.sort(key=lambda x: x["applicantsNumber"], reverse=False)
 
 
 def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
-    html_content = f"""
+    html_content = """
         <html>
         <head>
             <title>Filtered Articles</title>
@@ -170,7 +170,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
             </style>
         </head>
         <body>
-            <h1>Latest Remote Jobs: .NET ({len(data)} Articles)</h1>
+            <h1>Latest Remote Jobs: .NET </h1>
             <table>
                 <tr>
                     <th>Posted</th>
@@ -183,7 +183,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
         """
 
     for article in data:
-            html_content += f"""
+            html_content += """
                 <tr>
                 <td>{article['published']}</td>
                 <td>{article['title']}</td>
