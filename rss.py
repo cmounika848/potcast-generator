@@ -1,185 +1,183 @@
-import feedparser 
-from datetime import datetime
-import config
-import re
-from bs4 import BeautifulSoup
+# Get the Rss Feed 
+# Get the Rss Feed from the url
+import feedparser
+import requests
+import json
+import os
+import logging
+from datetime import datetime, timedelta
+from typing import List, Dict, Any, Optional
+from requests.exceptions import RequestException
+import time
 
-items = []
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def update_readme(readme_path, table_content):
-    with open(readme_path, 'r') as file:
-        content = file.readlines()
+# Define the RSS feed URL
+RSS_FEED_URL = "https://politepol.com/fd/V5buPLaIoQot.xml"
+# Define the time interval for checking new articles (in hours)
+CHECK_INTERVAL_HOURS = 1
+# Define the time interval for checking new articles (in hours)
+CHECK_INTERVAL = timedelta(hours=CHECK_INTERVAL_HOURS)
+allData = None
 
-    new_content = ['\n', table_content, '\n']
+# Make the API request to get the RSS feed
+def fetch_rss_feed(url: str) -> Optional[Dict[str, Any]]:
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad responses
+        return feedparser.parse(response.content)
+    except RequestException as e:
+        logger.error(f"Error fetching RSS feed: {e}")
+        return None
 
-    with open(readme_path, 'w') as file:
-        file.writelines(new_content)
-
-date_format = "%a, %d %b %Y %H:%M:%S %z"  # Use %z for timezone-aware parsing
-
-def remove_img_tags(description):
-    # Regex to match <img ... /> tags
-    img_tag_pattern = re.compile(r'<img[^>]*>')
-    return img_tag_pattern.sub('', description)
+# Call the function to fetch and save the RSS feed
+def fetch_and_store_rss_feed() -> None:
+    global allData
+    feed = fetch_rss_feed(RSS_FEED_URL)
+    if feed:
+        allData = feed
+        logger.info("RSS feed successfully fetched and stored in memory.")
+    else:
+        logger.error("Failed to fetch RSS feed.")
     
-def parse_date(date_str):
-    # Replace "GMT" with "+0000" for consistency in parsing
-    normalized_date_str = date_str.replace("GMT", "+0000")
-    return datetime.strptime(normalized_date_str, date_format)
+fetch_and_store_rss_feed()
 
-def remove_html_tags(html_content):
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(html_content, 'html.parser')
-    # Extract and return the raw text
-    return soup.get_text()
-
-for feeds in config.URLs:
-    URL = feeds['feed']
-    author = feeds['author']
-    feed = feedparser.parse(URL)
-    for entry in feed.entries:
-        title = entry.get("title", "")
-        link = entry.get("link", "")
-        description = entry.get("description", "")
-        description = remove_html_tags(description)
-        
-
-        description = description[0:500]
-        if description != "null":
-            description = description + "..."
-            
-        #print("-----")
-        #print(description)
-        pubDate = entry.get("published", "")
-        if pubDate:
-            pubDate = parse_date(pubDate)
-            pubDate = pubDate.strftime("%Y-%m-%d %H:%M:%S")
-        items.append({'title': title, 'link': link, 'description': description, 'published': pubDate, 'company': author})
-
-# Sort the items by published date
-items = sorted(items, key=lambda x: x['published'], reverse=True)
-
-
-# Function to generate HTML content
-def generate_html(items):
-    html_start = """
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-            overflow-x: hidden; /* Prevent horizontal scrolling */
+# Extract the articles from the feed
+def extract_articles(feed: Dict[str, Any]) -> List[Dict[str, Any]]:
+    articles = []
+    for entry in feed.get("entries", []):
+        article = {
+            "title": entry.get("title"),
+            "link": entry.get("link"),
+            "published": entry.get("published"),
         }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            background-color: #fff;
-            margin-bottom: 20px;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #2c3e50;
-            margin-top: 0;
-        }
-        p {
-            color: #34495e;
-        }
-        .company {
-            font-weight: bold;
-            color: #3498db;
-        }
-        a span {
-            text-decoration: none; /* Remove underline for nested span */
-        }
+        articles.append(article)
+    return articles
 
+if allData:
+    data = extract_articles(allData)
+else:
+    data = []
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            li {
-                padding: 15px;
-                font-size: 14px;
-            }
-
-            h2 {
+print("Total Jobs Found:", len(data))
+print("Applying Filter with Remote, .NET and not citizen")
+# Load each article from the feed and check if the content contains the keyword "remote" (case insensitive)
+filtered_data = []
+for article in data:
+    link = article["link"]
+    time.sleep(2)  # Sleep for 2 seconds between requests to avoid overwhelming the server
+    res = requests.get(link)
+    # After 5 articles exit the loop
+    # if len(filtered_data) >= 1:
+    #     break
+    if res.status_code == 200:
+        content = res.text
+        if "remote" in content.lower():
+            # content shouldn't include keyword "citizen"
+            if "citizen" in content.lower():
+                continue
+            # content should include keyword ".net" case insensitive
+            if ".net" in content.lower():
+                # Print the loop count
                 
-                font-size: 18px;
-                margin-bottom: 10px;
-            }
-            p {
-                font-size: 14px;
-                line-height: 1.4;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-            li {
-                padding: 10px;
-                font-size: 12px;
-            }
-            h2 {
-                font-size: 16px;
-                margin-bottom: 8px;
-            }
-            p {
-                font-size: 12px;
-                line-height: 1.3;
-            }
-        }
-
-    </style>
-</head>
-<body>
-    <h1>Latest Technology Trends by Kowsik</h1>
-    <ul>
-"""
-    
-    html_end = """
-    </ul>
-</body>
-</html>
-"""
-
-    # Generate list items dynamically
-    list_items = ""
-    for item in items:
-        list_items += f"""
-        
-        <li>
-        <a target="_blank" href="{item['link']}">
-        <h2>{item['title']}</h2>
-        </a>
-
+                title = article["title"]
+                newtitile = title.split('<span class="sr-only">')[1].split('</span>')[0]
+                newtitle = newtitile.replace("\n", "").strip()
+                article["title"] = newtitle
+                #print(newtitle)
+                company = content.split("<title>")[1].split("</title")[0]
+                article["company"] = company
+                print(f"Fetching Job: {len(filtered_data)+1} : {company}")
+                if '<figcaption class="num-applicants__caption">' in content:
+                    newContent = content.split('<figcaption class="num-applicants__caption">')[1].split('</figcaption>')[0]
+                    newContent = newContent.split('\n')[1].strip()
+                    article["applicants"] = newContent
+                    # Strip all alpha characters from the string
+                    applicantsNumber = ''.join(filter(str.isdigit, newContent))
+                    article["applicantsNumber"] = int(applicantsNumber)
+                else:
+                    if '<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">' in content:
+                        newContent = content.split('<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">')[1].split('</span>')[0]
+                        newContent = newContent.split('\n')[1].strip()
+                        article["applicants"] = newContent
+                        # Strip all alpha characters from the string
+                        applicantsNumber = ''.join(filter(str.isdigit, newContent))
+                        article["applicantsNumber"] = int(applicantsNumber)
+                    else:
+                        #print("No applicants found")
+                        article["applicants"] = "0"
+                        article["applicantsNumber"] = 0
+                        #with open("content.txt", "w", encoding="utf-8") as f:
+                        #    f.write(content)
+                        #exit(1)
+                filtered_data.append(article)
+                #print(article)
+                continue
+            #print(f"Article with link {link} contains 'remote'")
             
-            <p><span class="company">{item['company']}</span>: {item['description']}</p>
-        </li>
-"""
-    
-    # Combine all parts
-    return html_start + list_items + html_end
+        #else:
+            #print(f"Article with link {link} does not contain 'remote'")
+            # Remove from articles list if it does not contain "remote"
+            #data.remove(article)
+    else:
+        print(f"Failed to fetch article from {link}, status code: {res.status_code}")
 
-# Generate the HTML content
-html_content = generate_html(items)
+print("Filtered data:", len(filtered_data))
+# Sort the Filtered data by applicants number in acending order
+filtered_data.sort(key=lambda x: x["applicantsNumber"], reverse=False)
+# create a HTML file with the filtered data using table format with all the columns
+def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
+    html_content = """
+    <html>
+    <head>
+        <title>Filtered Articles</title>
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Latest Remote Jobs: .NET</h1>
+        <table>
+            <tr>
+                <th>Posted</th>
+                <th>Title</th>
+                <th>Applicants</th>
+                <th>Company</th>
+                <th>Apply</th>
+            </tr>
+    """
 
-# Write the HTML content to a file
-update_readme('index.html', html_content)
+    for article in data:
+        html_content += f"""
+            <tr>
+            <td>{article['published']}</td>
+            <td>{article['title']}</td>
+            <td>{article['applicants']}</td>
+            <td>{article['company']}</td>
+            <td><a href="{article['link']}" target="_blank" onclick="this.style.color='gray'; this.innerText='Visited';">URL</a></td>
+            </tr>
+        """
+
+    html_content += """
+        </table>
+    </body>
+    </html>
+    """
+
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+create_html_file(filtered_data, "index.html")
