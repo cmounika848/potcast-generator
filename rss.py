@@ -13,169 +13,191 @@ import time
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Define the RSS feed URL
-RSS_FEED_URL = "https://politepol.com/fd/V5buPLaIoQot.xml"
-# Define the time interval for checking new articles (in hours)
-CHECK_INTERVAL_HOURS = 1
-# Define the time interval for checking new articles (in hours)
-CHECK_INTERVAL = timedelta(hours=CHECK_INTERVAL_HOURS)
-allData = None
-
-# Make the API request to get the RSS feed
-def fetch_rss_feed(url: str) -> Optional[Dict[str, Any]]:
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an error for bad responses
-        return feedparser.parse(response.content)
-    except RequestException as e:
-        logger.error(f"Error fetching RSS feed: {e}")
-        return None
-
-# Call the function to fetch and save the RSS feed
-def fetch_and_store_rss_feed() -> None:
-    global allData
-    feed = fetch_rss_feed(RSS_FEED_URL)
-    if feed:
-        allData = feed
-        logger.info("RSS feed successfully fetched and stored in memory.")
-    else:
-        logger.error("Failed to fetch RSS feed.")
-    
-fetch_and_store_rss_feed()
-
-# Extract the articles from the feed
-def extract_articles(feed: Dict[str, Any]) -> List[Dict[str, Any]]:
-    articles = []
-    for entry in feed.get("entries", []):
-        article = {
-            "title": entry.get("title"),
-            "link": entry.get("link"),
-            "published": entry.get("published"),
-        }
-        articles.append(article)
-    return articles
-
-if allData:
-    data = extract_articles(allData)
-else:
-    data = []
-
-print("Total Jobs Found:", len(data))
-print("Applying Filter with Remote, .NET and not citizen")
-# Load each article from the feed and check if the content contains the keyword "remote" (case insensitive)
 filtered_data = []
-for article in data:
-    link = article["link"]
-    time.sleep(2)  # Sleep for 2 seconds between requests to avoid overwhelming the server
-    res = requests.get(link)
-    # After 5 articles exit the loop
-    # if len(filtered_data) >= 1:
-    #     break
-    if res.status_code == 200:
-        content = res.text
-        if "remote" in content.lower():
-            # content shouldn't include keyword "citizen"
-            if "citizen" in content.lower():
-                continue
-            # content should include keyword ".net" case insensitive
-            if ".net" in content.lower():
-                # Print the loop count
-                
-                title = article["title"]
-                newtitile = title.split('<span class="sr-only">')[1].split('</span>')[0]
-                newtitle = newtitile.replace("\n", "").strip()
-                article["title"] = newtitle
-                #print(newtitle)
-                company = content.split("<title>")[1].split("</title")[0]
-                article["company"] = company
-                print(f"Fetching Job: {len(filtered_data)+1} : {company}")
-                if '<figcaption class="num-applicants__caption">' in content:
-                    newContent = content.split('<figcaption class="num-applicants__caption">')[1].split('</figcaption>')[0]
-                    newContent = newContent.split('\n')[1].strip()
-                    article["applicants"] = newContent
-                    # Strip all alpha characters from the string
-                    applicantsNumber = ''.join(filter(str.isdigit, newContent))
-                    article["applicantsNumber"] = int(applicantsNumber)
-                else:
-                    if '<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">' in content:
-                        newContent = content.split('<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">')[1].split('</span>')[0]
+# Set array of URLs
+URLs = {
+    "https://politepol.com/fd/V5buPLaIoQot.xml",
+    "https://politepol.com/fd/uNTJ4RCbv385.xml"
+}
+
+allData = None
+# Define the RSS feed URL
+for each in URLs:
+    RSS_FEED_URL = each
+    # Define the time interval for checking new articles (in hours)
+    CHECK_INTERVAL_HOURS = 1
+    # Define the time interval for checking new articles (in hours)
+    CHECK_INTERVAL = timedelta(hours=CHECK_INTERVAL_HOURS)
+    
+
+    # Make the API request to get the RSS feed
+    def fetch_rss_feed(url: str) -> Optional[Dict[str, Any]]:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Raise an error for bad responses
+            return feedparser.parse(response.content)
+        except RequestException as e:
+            logger.error(f"Error fetching RSS feed: {e}")
+            return None
+
+    # Call the function to fetch and save the RSS feed
+    def fetch_and_store_rss_feed() -> None:
+        global allData
+        feed = fetch_rss_feed(RSS_FEED_URL)
+        if feed:
+            allData = feed
+            logger.info("RSS feed successfully fetched and stored in memory.")
+        else:
+            logger.error("Failed to fetch RSS feed.")
+        
+    fetch_and_store_rss_feed()
+
+    # Extract the articles from the feed
+    def extract_articles(feed: Dict[str, Any]) -> List[Dict[str, Any]]:
+        global filtered_data
+        articles = []
+        for entry in feed.get("entries", []):
+            article = {
+                "title": entry.get("title"),
+                "link": entry.get("link"),
+                "published": entry.get("published"),
+            }
+            articles.append(article)
+        return articles
+
+    if allData:
+        data = extract_articles(allData)
+    else:
+        data = []
+
+    print("Total Jobs Found:", len(data))
+    print("Applying Filter with Remote, .NET and not citizen")
+    # Load each article from the feed and check if the content contains the keyword "remote" (case insensitive)
+    
+    for article in data:
+        link = article["link"]
+        time.sleep(2)  # Sleep for 2 seconds between requests to avoid overwhelming the server
+        res = requests.get(link)
+        # After 5 articles exit the loop
+        # if len(filtered_data) >= 1:
+        #     break
+        if res.status_code == 200:
+            content = res.text
+            if "remote" in content.lower() or "uNTJ4RCbv385" in RSS_FEED_URL:
+                # content shouldn't include keyword "citizen"
+                if "citizen" in content.lower():
+                    continue
+                # content should include keyword ".net" case insensitive
+                if ".net" in content.lower():
+                    # Print the loop count
+                    
+                    title = article["title"]
+                    newtitile = title.split('<span class="sr-only">')[1].split('</span>')[0]
+                    newtitle = newtitile.replace("\n", "").strip()
+                    article["title"] = newtitle
+                    #print(newtitle)
+                    company = content.split("<title>")[1].split("</title")[0]
+                    article["company"] = company
+                    print(f"Fetching Job: {len(filtered_data)+1} : {company}")
+                    if '<figcaption class="num-applicants__caption">' in content:
+                        newContent = content.split('<figcaption class="num-applicants__caption">')[1].split('</figcaption>')[0]
                         newContent = newContent.split('\n')[1].strip()
                         article["applicants"] = newContent
                         # Strip all alpha characters from the string
                         applicantsNumber = ''.join(filter(str.isdigit, newContent))
                         article["applicantsNumber"] = int(applicantsNumber)
                     else:
-                        #print("No applicants found")
-                        article["applicants"] = "0"
-                        article["applicantsNumber"] = 0
-                        #with open("content.txt", "w", encoding="utf-8") as f:
-                        #    f.write(content)
-                        #exit(1)
-                filtered_data.append(article)
-                #print(article)
-                continue
-            #print(f"Article with link {link} contains 'remote'")
-            
-        #else:
-            #print(f"Article with link {link} does not contain 'remote'")
-            # Remove from articles list if it does not contain "remote"
-            #data.remove(article)
-    else:
-        print(f"Failed to fetch article from {link}, status code: {res.status_code}")
+                        if '<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">' in content:
+                            newContent = content.split('<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">')[1].split('</span>')[0]
+                            newContent = newContent.split('\n')[1].strip()
+                            article["applicants"] = newContent
+                            # Strip all alpha characters from the string
+                            applicantsNumber = ''.join(filter(str.isdigit, newContent))
+                            article["applicantsNumber"] = int(applicantsNumber)
+                        else:
+                            #print("No applicants found")
+                            article["applicants"] = "0"
+                            article["applicantsNumber"] = 0
+                            #with open("content.txt", "w", encoding="utf-8") as f:
+                            #    f.write(content)
+                            #exit(1)
+                    if "uNTJ4RCbv385" in RSS_FEED_URL:
+                        article["type"] = "Local"
+                    else:
+                        article["type"] = "Remote"
+                    filtered_data.append(article)
+                    #print(article)
+                    continue
+                #print(f"Article with link {link} contains 'remote'")
+                
+            #else:
+                #print(f"Article with link {link} does not contain 'remote'")
+                # Remove from articles list if it does not contain "remote"
+                #data.remove(article)
+        else:
+            print(f"Failed to fetch article from {link}, status code: {res.status_code}")
 
 print("Filtered data:", len(filtered_data))
-# Sort the Filtered data by applicants number in acending order
+    # Remove duplicates based on the 'link' field
+unique_links = set()
+filtered_data = [article for article in filtered_data if article["link"] not in unique_links and not unique_links.add(article["link"])]
+
+# Sort the filtered data by applicants number in ascending order
 filtered_data.sort(key=lambda x: x["applicantsNumber"], reverse=False)
-# create a HTML file with the filtered data using table format with all the columns
+
+# Create an HTML file with the filtered data using table format with all the columns
+
+
 def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
     html_content = """
-    <html>
-    <head>
-        <title>Filtered Articles</title>
-        <style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            th, td {
-                border: 1px solid black;
-                padding: 8px;
-                text-align: left;
-            }
-            th {
-                background-color: #f2f2f2;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Latest Remote Jobs: .NET</h1>
-        <table>
-            <tr>
-                <th>Posted</th>
-                <th>Title</th>
-                <th>Applicants</th>
-                <th>Company</th>
-                <th>Apply</th>
-            </tr>
-    """
-
-    for article in data:
-        html_content += f"""
-            <tr>
-            <td>{article['published']}</td>
-            <td>{article['title']}</td>
-            <td>{article['applicants']}</td>
-            <td>{article['company']}</td>
-            <td><a href="{article['link']}" target="_blank" onclick="this.style.color='gray'; this.innerText='Visited';">URL</a></td>
-            </tr>
+        <html>
+        <head>
+            <title>Filtered Articles</title>
+            <style>
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                th, td {
+                    border: 1px solid black;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #f2f2f2;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Latest Remote Jobs: .NET</h1>
+            <table>
+                <tr>
+                    <th>Posted</th>
+                    <th>Title</th>
+                    <th>Applicants</th>
+                    <th>Type</th>
+                    <th>Company</th>
+                    <th>Apply</th>
+                </tr>
         """
 
+    for article in data:
+            html_content += f"""
+                <tr>
+                <td>{article['published']}</td>
+                <td>{article['title']}</td>
+                <td>{article['applicants']}</td>
+                <td>{article['type']}</td>
+                <td>{article['company']}</td>
+                <td><a href="{article['link']}" target="_blank" onclick="this.style.color='gray'; this.innerText='Visited';">URL</a></td>
+                </tr>
+            """
+
     html_content += """
-        </table>
-    </body>
-    </html>
-    """
+            </table>
+        </body>
+        </html>
+        """
 
     with open(filename, "w", encoding="utf-8") as f:
         f.write(html_content)
