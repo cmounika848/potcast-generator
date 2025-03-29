@@ -41,8 +41,9 @@ def get_data_from_github(url: str) -> Optional[Dict[str, Any]]:
                             }
 
         response = requests.get(url, headers=headers)
+        print(response)
         response = response.json()
-
+        print(response)
         return json.loads(atob(response['content']))
     except RequestException as e:
         logger.error(f"Error fetching data from GitHub: {e}")
