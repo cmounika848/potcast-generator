@@ -173,6 +173,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
             <h1>Latest Remote Jobs: .NET </h1>
             <table>
                 <tr>
+                    <th>S.No</th>
                     <th>Posted</th>
                     <th>Title</th>
                     <th>Applicants</th>
@@ -185,6 +186,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
     for article in data:
             html_content += f"""
                 <tr>
+                <td>{data.index(article) + 1}</td>
                 <td>{article['published']}</td>
                 <td>{article['title']}</td>
                 <td>{article['applicants']}</td>
