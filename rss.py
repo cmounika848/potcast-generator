@@ -37,13 +37,12 @@ def get_data_from_github(url: str) -> Optional[Dict[str, Any]]:
     try:
         # Set the Headers and get the sha
         headers= {
-                                'Authorization': 'token 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'
+                                'Authorization': 'token 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'
                             }
 
         response = requests.get(url, headers=headers)
-        print(response)
         response = response.json()
-        print(response)
+
         return json.loads(atob(response['content']))
     except RequestException as e:
         logger.error(f"Error fetching data from GitHub: {e}")
@@ -235,7 +234,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                         // Fetch the SHA of the file from GitHub
                         const shaResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
                             headers: {
-                                'Authorization': 'token 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'
+                                'Authorization': 'token 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'
                             }
                         });
                         if (!shaResponse.ok) {
@@ -255,7 +254,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                         const updateResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
                             method: 'PUT',
                             headers: {
-                                'Authorization': 'token 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',
+                                'Authorization': 'token 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',
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
