@@ -31,13 +31,14 @@ URLs = {
     "https://politepol.com/fd/DcNWUYWHMmaS.xml"
 }
 
+token = "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"
 
 # get the data from github repository
 def get_data_from_github(url: str) -> Optional[Dict[str, Any]]:
     try:
         # Set the Headers and get the sha
         headers= {
-                                'Authorization': 'token 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'
+                                'Authorization': 'token ' + token,
                             }
 
         response = requests.get(url, headers=headers)
@@ -234,7 +235,8 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                         // Fetch the SHA of the file from GitHub
                         const shaResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
                             headers: {
-                                'Authorization': 'token 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'
+                                'Authorization': 'token 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',
+                                'Content-Type': 'application/json'
                             }
                         });
                         if (!shaResponse.ok) {
@@ -254,7 +256,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                         const updateResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
                             method: 'PUT',
                             headers: {
-                                'Authorization': 'token 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',
+                                'Authorization': 'token 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',
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
