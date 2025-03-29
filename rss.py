@@ -183,7 +183,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
         """
 
     for article in data:
-            html_content += """
+            html_content += f"""
                 <tr>
                 <td>{article['published']}</td>
                 <td>{article['title']}</td>
