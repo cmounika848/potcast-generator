@@ -31,7 +31,7 @@ URLs = {
     "https://politepol.com/fd/DcNWUYWHMmaS.xml"
 }
 
-token = atob(atob("ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3ZG01b1dYWnFhbFJoZGtsYVgwRnpiSFZoVEVkQ1RWQkdOakJJYld0eVEzWlJRMjVFWTFob2JGUkZTMW8yUkRrMk9IWXdSVXBwT0VoSlJrUkpTME5JTW1SdVRsZEdhSG8x"))
+token = atob(atob("ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3V2tkTlpVWnFXWGg1YVRkeVgwc3dPSEJXVW5CMFFYaElhWG96TkdwelQyNDRSVTlUYURsbFdub3pOblV5TjNaT1ZVRnlaelpXWm14RFRUWkpSbGhGV1c5cU5tUkhkalZQ"))
 # get the data from github repository
 def get_data_from_github(url: str) -> Optional[Dict[str, Any]]:
     try:
@@ -234,7 +234,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                         // Fetch the SHA of the file from GitHub
                         const shaResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
                             headers: {
-                                'Authorization': atob(atob('ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3ZG01b1dYWnFhbFJoZGtsYVgwRnpiSFZoVEVkQ1RWQkdOakJJYld0eVEzWlJRMjVFWTFob2JGUkZTMW8yUkRrMk9IWXdSVXBwT0VoSlJrUkpTME5JTW1SdVRsZEdhSG8x')),
+                                'Authorization': atob(atob('ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3V2tkTlpVWnFXWGg1YVRkeVgwc3dPSEJXVW5CMFFYaElhWG96TkdwelQyNDRSVTlUYURsbFdub3pOblV5TjNaT1ZVRnlaelpXWm14RFRUWkpSbGhGV1c5cU5tUkhkalZQ')),
                                 'Content-Type': 'application/json'
                             }
                         });
@@ -255,7 +255,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                         const updateResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
                             method: 'PUT',
                             headers: {
-                                'Authorization': atob(atob('ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3ZG01b1dYWnFhbFJoZGtsYVgwRnpiSFZoVEVkQ1RWQkdOakJJYld0eVEzWlJRMjVFWTFob2JGUkZTMW8yUkRrMk9IWXdSVXBwT0VoSlJrUkpTME5JTW1SdVRsZEdhSG8x')),
+                                'Authorization': atob(atob('ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3V2tkTlpVWnFXWGg1YVRkeVgwc3dPSEJXVW5CMFFYaElhWG96TkdwelQyNDRSVTlUYURsbFdub3pOblV5TjNaT1ZVRnlaelpXWm14RFRUWkpSbGhGV1c5cU5tUkhkalZQ')),
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
