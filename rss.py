@@ -31,27 +31,8 @@ URLs = {
     "https://politepol.com/fd/DcNWUYWHMmaS.xml"
 }
 
-token = "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"
 
-# get the data from github repository
-def get_data_from_github(url: str) -> Optional[Dict[str, Any]]:
-    try:
-        # Set the Headers and get the sha
-        headers= {
-                                'Authorization': 'token ' + token,
-                            }
 
-        response = requests.get(url, headers=headers)
-        response = response.json()
-
-        return json.loads(atob(response['content']))
-    except RequestException as e:
-        logger.error(f"Error fetching data from GitHub: {e}")
-        return None
-
-applied = get_data_from_github("https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json")
-
-print("Applied Jobs:", len(applied))
 allData = None
 # Define the RSS feed URL
 for each in URLs:
@@ -111,9 +92,7 @@ for each in URLs:
         # link is in applied skip
         #print(f"Checking {link}")
         #print(f"Already applied for {applied}")
-        if link in applied:
-            #print(f"Already applied for {link}")
-            continue
+
         time.sleep(2)  # Sleep for 2 seconds between requests to avoid overwhelming the server
         res = requests.get(link)
         # After 5 articles exit the loop
@@ -184,134 +163,9 @@ filtered_data = [article for article in filtered_data if article["link"] not in 
 # Sort the filtered data by applicants number in ascending order
 filtered_data.sort(key=lambda x: x["applicantsNumber"], reverse=False)
 
-# Create an HTML file with the filtered data using table format with all the columns
+# Create a JSON file with the filtered data
+filtered_data_json = json.dumps(filtered_data, indent=4, ensure_ascii=False)
 
-
-def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
-    html_content = """
-        <html>
-        <head>
-            <title>Filtered Articles</title>
-            <style>
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-                th, td {
-                    border: 1px solid black;
-                    padding: 8px;
-                    text-align: left;
-                }
-                th {
-                    background-color: #f2f2f2;
-                }
-                button {
-                    margin: 10px 0;
-                    padding: 10px 20px;
-                    background-color: #4CAF50;
-                    color: white;
-                    border: none;
-                    cursor: pointer;
-                }
-                button:hover {
-                    background-color: #45a049;
-                }
-            </style>
-            <script>
-                async function updateVisitedLinks() {
-                    try {
-                       
-                        const links = document.querySelectorAll('a');
-                        const visitedLinks = Array.from(links)
-                            .filter(link => link.innerText === 'Visited')
-                            .map(link => link.href);
-                        
-                        // Skip if no links are marked as visited
-                        if (visitedLinks.length === 0) {
-                            alert('No links are marked as visited.');
-                            return;
-                        }
-
-                        // Fetch the SHA of the file from GitHub
-                        const shaResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
-                            headers: {
-                                'Authorization': 'token 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',
-                                'Content-Type': 'application/json'
-                            }
-                        });
-                        if (!shaResponse.ok) {
-                            alert('Failed to fetch SHA of the file.');
-                            return;
-                        }
-                        const shaData = await shaResponse.json();
-                        
-                        const appliedLinks = JSON.parse(atob(shaData.content));
-                        const fileSha = shaData.sha;
-
-                        // Update the applied links on GitHub
-                        let updatedLinks = [...new Set([...visitedLinks, ...appliedLinks])];
-                        //remove duplicates for updated links
-                        updatedLinks = [...new Set(updatedLinks)];
-        
-                        const updateResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json', {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': 'token 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',
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                message: 'Update applied links',
-                                content: btoa(JSON.stringify(updatedLinks)),
-                                sha: fileSha
-                            })
-                        });
-                        if (updateResponse.ok) {
-                            alert('Visited links updated successfully!');
-                        } else {
-                            alert('Failed to update visited links on GitHub.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating visited links:', error);
-                        alert('An error occurred while updating visited links.');
-                    }
-                }
-            </script>
-        </head>
-        <body>
-            <h1>Latest Remote Jobs: .NET</h1>
-            <button onclick="updateVisitedLinks()">Update Visited Links</button>
-            <table>
-                <tr>
-                    <th>S.No</th>
-                    <th>Posted</th>
-                    <th>Title</th>
-                    <th>Applicants</th>
-                    <th>Type</th>
-                    <th>Company</th>
-                    <th>Apply</th>
-                </tr>
-        """
-
-    for article in data:
-            html_content += f"""
-                <tr>
-                <td>{data.index(article) + 1}</td>
-                <td>{article['published']}</td>
-                <td>{article['title']}</td>
-                <td>{article['applicants']}</td>
-                <td>{article['type']}</td>
-                <td>{article['company']}</td>
-                <td><a href="{article['link']}" target="_blank" onclick="this.style.color='gray'; this.innerText='Visited';">URL</a></td>
-                </tr>
-            """
-
-    html_content += """
-            </table>
-        </body>
-        </html>
-        """
-
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(html_content)
-
-create_html_file(filtered_data, "index.html")
+with open("data.json", "w", encoding="utf-8") as f:
+    f.write(filtered_data_json)
+print("Filtered data saved to filtered_data.json")
