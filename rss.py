@@ -92,7 +92,7 @@ def notify(article):
         company = article["company"]
         company = company.split(" | ")[0]
         company = company.replace("#", " Sharp")
-        send(article["company"] + " : " + "https://cmounika848.github.io/jobs/")
+        send(article["company"] + " : " + url)
         print("Sending message to telegram for local jobs")
 
         # update the file with the new url
