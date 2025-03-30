@@ -28,6 +28,9 @@ def send(url):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
     requests.get(url) # this sends the message
 # Set up logging
+
+
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 filtered_data = []
@@ -64,6 +67,33 @@ def get_data_from_github(url: str) -> Optional[Dict[str, Any]]:
 
 applied = get_data_from_github("https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json")
 
+def notify(article):
+    url = article["link"]
+
+    headers= {'Authorization': token}
+    response = requests.get("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers)
+    response = response.json()
+    # decode the content and load it as json
+    currentNotify = json.loads(atob(response['content']))
+    # get the sha of the file from github
+    sha = response['sha']    
+    if url in currentNotify:
+        return
+    else:
+        company = article["company"]
+        company = company.split(" | ")[0]
+        company = company.replace("#", " Sharp")
+        send(article["company"] + " : " + "https://cmounika848.github.io/jobs/")
+        print("Sending message to telegram for local jobs")
+
+        # update the file with the new url
+        currentNotify.append(url)
+        headers= {
+                                'Authorization': token,
+                            }
+        response = requests.put("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers, data=json.dumps(currentNotify), sha=sha)
+        response = response.json()
+        #print(response)
 print("Applied Jobs:", len(applied))
 allData = None
 # Define the RSS feed URL
@@ -208,11 +238,8 @@ print("Filtered Jobs:", len(filtered_data))
 
 for article in filtered_data:
     if article["type"] == "Local":
-        company = article["company"]
-        company = company.split(" | ")[0]
-        company = company.replace("#", " Sharp")
-        send(article["company"] + " : " + "https://cmounika848.github.io/jobs/")
-        print("Sending message to telegram for local jobs")
+        notify(article)
+
 
 def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
     html_content = """
