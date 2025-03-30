@@ -28,10 +28,7 @@ filtered_data = []
 URLs = {
     "https://politepol.com/fd/V5buPLaIoQot.xml",
     "https://politepol.com/fd/uNTJ4RCbv385.xml",
-    "https://politepol.com/fd/DcNWUYWHMmaS.xml",
-    "https://politepol.com/fd/kPW2JskqeS7h.xml",
-    "https://politepol.com/fd/hRHVasLAbKAK.xml",
-    "https://politepol.com/fd/EJKak4yHwHoj.xml"
+    "https://politepol.com/fd/DcNWUYWHMmaS.xml"
 }
 
 token = atob(atob("ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3V2tkTlpVWnFXWGg1YVRkeVgwc3dPSEJXVW5CMFFYaElhWG96TkdwelQyNDRSVTlUYURsbFdub3pOblV5TjNaT1ZVRnlaelpXWm14RFRUWkpSbGhGV1c5cU5tUkhkalZQ"))
@@ -109,7 +106,11 @@ for each in URLs:
     # Load each article from the feed and check if the content contains the keyword "remote" (case insensitive)
     
     for article in data:
+        # get the article link before "?" substring
+        if "?" in article["link"]:
+            article["link"] = article["link"].split("?")[0]
         link = article["link"]
+        
         # link is in applied skip
         #print(f"Checking {link}")
         #print(f"Already applied for {applied}")
