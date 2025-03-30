@@ -184,6 +184,8 @@ for each in URLs:
                             #exit(1)
                     if "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
                         article["type"] = "Local"
+                        send(article["link"])
+                        print("Sending message to telegram for local jobs")
                     else:
                         article["type"] = "Remote"
                     filtered_data.append(article)
