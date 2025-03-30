@@ -92,7 +92,7 @@ def notify(article):
         company = article["company"]
         company = company.split(" | ")[0]
         company = company.replace("#", " Sharp")
-        send(article["company"] + " : " + url)
+        send(company + " : " + url)
         print("Sending message to telegram for local jobs")
 
         # update the file with the new url
@@ -102,7 +102,7 @@ def notify(article):
                             }
         data = {
             "message": "Update notify links",
-            "content": btoa(json.dumps(currentNotify)),
+            "content": btoa(json.stringify(currentNotify)),
             "sha": sha
         }
         response = requests.put("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers, data=data)
