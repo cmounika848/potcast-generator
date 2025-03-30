@@ -161,9 +161,7 @@ for each in URLs:
                         # Strip all alpha characters from the string
                         applicantsNumber = ''.join(filter(str.isdigit, newContent))
                         article["applicantsNumber"] = int(applicantsNumber)
-                        if(int(applicantsNumber) < 25):
-                            send(link)
-                            print("Sending message to telegram for less than 25 applicants")
+
                     else:
                         if '<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">' in content:
                             newContent = content.split('<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">')[1].split('</span>')[0]
@@ -172,9 +170,7 @@ for each in URLs:
                             # Strip all alpha characters from the string
                             applicantsNumber = ''.join(filter(str.isdigit, newContent))
                             article["applicantsNumber"] = int(applicantsNumber)
-                            if(int(applicantsNumber) < 25):
-                                send(link)
-                                print("Sending message to telegram for less than 25 applicants")
+
                         else:
                             #print("No applicants found")
                             article["applicants"] = "0"
@@ -184,8 +180,7 @@ for each in URLs:
                             #exit(1)
                     if "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
                         article["type"] = "Local"
-                        send(article["link"])
-                        print("Sending message to telegram for local jobs")
+
                     else:
                         article["type"] = "Remote"
                     filtered_data.append(article)
@@ -211,7 +206,15 @@ filtered_data.sort(key=lambda x: x["applicantsNumber"], reverse=False)
 # Create an HTML file with the filtered data using table format with all the columns
 print("Filtered Jobs:", len(filtered_data))
 
-
+for article in filtered_data:
+    if int(article["applicantsNumber"]) < 25:
+        send(article["link"])
+        print("Sending message to telegram for less than 25 applicants")
+    elif article("type") == "Local":
+        send(article["link"])
+        print("Sending message to telegram for local jobs")
+    else:
+        continue
 def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
     html_content = """
         <html>
