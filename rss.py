@@ -208,6 +208,9 @@ print("Filtered Jobs:", len(filtered_data))
 
 for article in filtered_data:
     if article["type"] == "Local":
+        company = article["company"]
+        company = company.split(" | ")[0]
+        company = company.replace("#", " Sharp")
         send(article["company"] + " : " + "https://cmounika848.github.io/jobs/")
         print("Sending message to telegram for local jobs")
 
