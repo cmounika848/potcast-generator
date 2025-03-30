@@ -19,7 +19,16 @@ def atob(data: str) -> str:
     except Exception as e:
         print(f"Error decoding base64 data: {e}")
         return data
-
+    
+def btoa(data: str) -> str:
+    """Encode a string to base64."""
+    try:
+        # Encode the string to base64 and return the encoded content
+        return base64.b64encode(data.encode('utf-8')).decode('utf-8')
+    except Exception as e:
+        print(f"Error encoding data to base64: {e}")
+        return data
+    
 def send(url):
     TOKEN = "Tnpnd05qQTBOamcyTkRwQlFVWlBNRkZuT0cxMWIwRTBURWx1YXpCMlNGbGhkVzlrVVRoTFNuRlhaVXBIV1E9PQ=="
     TOKEN = atob(atob(TOKEN))
@@ -91,7 +100,12 @@ def notify(article):
         headers= {
                                 'Authorization': token,
                             }
-        response = requests.put("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers, data=json.dumps(currentNotify), sha=sha)
+        data = {
+            "message": "Update notify links",
+            "content": btoa(json.dumps(currentNotify)),
+            "sha": sha
+        }
+        response = requests.put("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers, data=data)
         response = response.json()
         #print(response)
 print("Applied Jobs:", len(applied))
