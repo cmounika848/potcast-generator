@@ -131,7 +131,7 @@ for each in URLs:
         #     break
         if res.status_code == 200:
             content = res.text
-            if "remote" in content.lower() or "uNTJ4RCbv385" in RSS_FEED_URL:
+            if "remote" in content.lower() or "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
                 # content shouldn't include keyword "citizen"
                 if "citizen" in content.lower():
                     continue
@@ -169,7 +169,7 @@ for each in URLs:
                             #with open("content.txt", "w", encoding="utf-8") as f:
                             #    f.write(content)
                             #exit(1)
-                    if "uNTJ4RCbv385" in RSS_FEED_URL:
+                    if "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
                         article["type"] = "Local"
                     else:
                         article["type"] = "Remote"
