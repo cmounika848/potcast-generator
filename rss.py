@@ -26,7 +26,7 @@ def send(url):
     chat_id = "-4640170739"
     message = url
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
-    print(requests.get(url).json()) # this sends the message
+    requests.get(url) # this sends the message
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
