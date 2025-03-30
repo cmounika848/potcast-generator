@@ -24,7 +24,7 @@ def send(url):
     TOKEN = "Tnpnd05qQTBOamcyTkRwQlFVWlBNRkZuT0cxMWIwRTBURWx1YXpCMlNGbGhkVzlrVVRoTFNuRlhaVXBIV1E9PQ=="
     TOKEN = atob(atob(TOKEN))
     chat_id = "-4640170739"
-    message = "url"
+    message = url
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
     print(requests.get(url).json()) # this sends the message
 # Set up logging
@@ -161,7 +161,7 @@ for each in URLs:
                         # Strip all alpha characters from the string
                         applicantsNumber = ''.join(filter(str.isdigit, newContent))
                         article["applicantsNumber"] = int(applicantsNumber)
-                        if(int(applicantsNumber) <25):
+                        if(int(applicantsNumber) < 25):
                             send(link)
                             print("Sending message to telegram for less than 25 applicants")
                     else:
@@ -172,7 +172,7 @@ for each in URLs:
                             # Strip all alpha characters from the string
                             applicantsNumber = ''.join(filter(str.isdigit, newContent))
                             article["applicantsNumber"] = int(applicantsNumber)
-                            if(int(applicantsNumber) <25):
+                            if(int(applicantsNumber) < 25):
                                 send(link)
                                 print("Sending message to telegram for less than 25 applicants")
                         else:
