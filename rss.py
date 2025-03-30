@@ -31,7 +31,8 @@ URLs = {
     "https://politepol.com/fd/DcNWUYWHMmaS.xml",
     "https://politepol.com/fd/kPW2JskqeS7h.xml",
     "https://politepol.com/fd/hRHVasLAbKAK.xml",
-    "https://politepol.com/fd/EJKak4yHwHoj.xml"
+    "https://politepol.com/fd/EJKak4yHwHoj.xml",
+    "https://politepol.com/fd/LW8RCehcu2qH.xml"
 }
 
 token = atob(atob("ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3V2tkTlpVWnFXWGg1YVRkeVgwc3dPSEJXVW5CMFFYaElhWG96TkdwelQyNDRSVTlUYURsbFdub3pOblV5TjNaT1ZVRnlaelpXWm14RFRUWkpSbGhGV1c5cU5tUkhkalZQ"))
