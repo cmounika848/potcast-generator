@@ -208,7 +208,7 @@ print("Filtered Jobs:", len(filtered_data))
 
 for article in filtered_data:
     if article["type"] == "Local":
-        send(article["link"])
+        send(article["company"] + " : " + "https://cmounika848.github.io/jobs/")
         print("Sending message to telegram for local jobs")
 
 def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
