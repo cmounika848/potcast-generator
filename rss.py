@@ -19,7 +19,14 @@ def atob(data: str) -> str:
     except Exception as e:
         print(f"Error decoding base64 data: {e}")
         return data
-    
+
+def send(url):
+    TOKEN = "Tnpnd05qQTBOamcyTkRwQlFVWlBNRkZuT0cxMWIwRTBURWx1YXpCMlNGbGhkVzlrVVRoTFNuRlhaVXBIV1E9PQ=="
+    TOKEN = atob(atob(TOKEN))
+    chat_id = "-4640170739"
+    message = "url"
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
+    print(requests.get(url).json()) # this sends the message
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -154,6 +161,9 @@ for each in URLs:
                         # Strip all alpha characters from the string
                         applicantsNumber = ''.join(filter(str.isdigit, newContent))
                         article["applicantsNumber"] = int(applicantsNumber)
+                        if(int(applicantsNumber) <25):
+                            send(link)
+                            print("Sending message to telegram for less than 25 applicants")
                     else:
                         if '<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">' in content:
                             newContent = content.split('<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">')[1].split('</span>')[0]
@@ -162,6 +172,9 @@ for each in URLs:
                             # Strip all alpha characters from the string
                             applicantsNumber = ''.join(filter(str.isdigit, newContent))
                             article["applicantsNumber"] = int(applicantsNumber)
+                            if(int(applicantsNumber) <25):
+                                send(link)
+                                print("Sending message to telegram for less than 25 applicants")
                         else:
                             #print("No applicants found")
                             article["applicants"] = "0"
