@@ -107,7 +107,7 @@ def notify(article):
         }
         response = requests.put("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers, data=data)
         response = response.json()
-        #print(response)
+        print(response)
 print("Applied Jobs:", len(applied))
 allData = None
 # Define the RSS feed URL
