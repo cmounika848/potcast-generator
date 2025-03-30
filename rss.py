@@ -207,14 +207,10 @@ filtered_data.sort(key=lambda x: x["applicantsNumber"], reverse=False)
 print("Filtered Jobs:", len(filtered_data))
 
 for article in filtered_data:
-    if int(article["applicantsNumber"]) < 25:
-        send(article["link"])
-        print("Sending message to telegram for less than 25 applicants")
-    elif article("type") == "Local":
+    if article["type"] == "Local":
         send(article["link"])
         print("Sending message to telegram for local jobs")
-    else:
-        continue
+
 def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
     html_content = """
         <html>
