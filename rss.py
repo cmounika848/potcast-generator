@@ -103,9 +103,10 @@ def notify(article):
                             }
         data = {
             "message": "Update notify links",
-            "content": btoa(json.dump(currentNotify)),
+            "content": btoa(json.dumps(currentNotify)),
             "sha": sha
         }
+
         response = requests.put("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers, data=data)
         response = response.json()
         print(response)
