@@ -97,12 +97,13 @@ def notify(article):
 
         # update the file with the new url
         currentNotify.append(url)
+        print(currentNotify)
         headers= {
                                 'Authorization': token,
                             }
         data = {
             "message": "Update notify links",
-            "content": btoa(json.stringify(currentNotify)),
+            "content": btoa(json.dump(currentNotify)),
             "sha": sha
         }
         response = requests.put("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers, data=data)
