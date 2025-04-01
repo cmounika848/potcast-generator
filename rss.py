@@ -210,7 +210,7 @@ for article in data:
                     if each.lower() in company.lower():                     
                         continue
                 article["company"] = company
-                print(f"Fetching Job: {len(filtered_data)+1} : {company}")
+                print(f"Fetching Job: {len(filetered_data)+1} : {company}")
                 if '<figcaption class="num-applicants__caption">' in content:
                     newContent = content.split('<figcaption class="num-applicants__caption">')[1].split('</figcaption>')[0]
                     newContent = newContent.split('\n')[1].strip()
@@ -411,7 +411,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
         </head>
         <body>
             <h1>Latest Remote Jobs: .NET</h1>
-            <button onclick="updateVisitedLinks()">Update Visited Links</bu
+            <button onclick="updateVisitedLinks()">Update Visited Links</button>
             <br>
             <input type="text" id="search" placeholder="">
             <button onclick="exclude(document.getElementById('search').value)">Exclude</button>
