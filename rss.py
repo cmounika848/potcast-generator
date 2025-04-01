@@ -206,8 +206,8 @@ for article in data:
                     #print(newtitle)
                 company = content.split("<title>")[1].split("</title")[0]
                 for each in exclude:
-                    if each in company:
-                            #print(f"Excluded {company}")
+                    # make case insensitive
+                    if each.lower() in company.lower():                     
                         continue
                 article["company"] = company
                 print(f"Fetching Job: {len(filtered_data)+1} : {company}")
