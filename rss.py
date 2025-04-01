@@ -360,7 +360,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                     try {
                        
                         if (data === "") {
-                            alert('No links are marked as visited.');
+                            alert('No data provided to exclude.');
                             return;
                         }
 
@@ -398,7 +398,7 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                             })
                         });
                         if (updateResponse.ok) {
-                            alert('Visited links updated successfully!');
+                            alert('Excluded company updated successfully!');
                         } else {
                             alert('Failed to update visited links on GitHub.');
                         }
@@ -411,11 +411,11 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
         </head>
         <body>
             <h1>Latest Remote Jobs: .NET</h1>
-            <button onclick="updateVisitedLinks()">Update Visited Links</button>
-            // Add a input box and a button to header and it should alert the value of the input box
-            //create a function to create the alert after button click
+            <button onclick="updateVisitedLinks()">Update Visited Links</bu
+            <br>
             <input type="text" id="search" placeholder="">
-            <button onclick="exclude(document.getElementById('search').value)">Search</button>
+            <button onclick="exclude(document.getElementById('search').value)">Exclude</button>
+            <br>
             <table>
                 <tr>
                     <th>S.No</th>
