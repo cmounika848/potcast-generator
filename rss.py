@@ -75,6 +75,7 @@ def get_data_from_github(url: str) -> Optional[Dict[str, Any]]:
         return None
 
 applied = get_data_from_github("https://api.github.com/repos/cmounika848/potcast-generator/contents/applied.json")
+exclude = get_data_from_github("https://api.github.com/repos/cmounika848/potcast-generator/contents/exclude.json")
 
 def notify(article):
     url = article["link"]
@@ -97,7 +98,7 @@ def notify(article):
 
         # update the file with the new url
         currentNotify.append(url)
-        print(currentNotify)
+        #print(currentNotify)
         headers= {
                                 'Authorization': token,
                             }
@@ -109,137 +110,147 @@ def notify(article):
 
         response = requests.put("https://api.github.com/repos/cmounika848/potcast-generator/contents/notify.json", headers=headers, data=data)
         response = response.json()
-        print(response)
+        #print(response)
 print("Applied Jobs:", len(applied))
 allData = None
 # Define the RSS feed URL
+    # Make the API request to get the RSS feed
+def fetch_rss_feed(url: str) -> Optional[Dict[str, Any]]:
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad responses
+        return feedparser.parse(response.content)
+    except RequestException as e:
+        logger.error(f"Error fetching RSS feed: {e}")
+        return None
+    # Call the function to fetch and save the RSS feed
+def fetch_and_store_rss_feed(RSS_FEED_URL) -> None:
+    global allData
+    feed = fetch_rss_feed(RSS_FEED_URL)
+    if feed:
+        allData = feed
+        return allData
+        #logger.info("RSS feed successfully fetched and stored in memory.")
+    else:
+        logger.error("Failed to fetch RSS feed.")
+        return []
+
+def extract_articles(feed: Dict[str, Any]) -> List[Dict[str, Any]]:
+    global filtered_data
+    articles = []
+    for entry in feed.get("entries", []):
+        link = entry.get("link")
+        if "?" in link:
+            link = link.split("?")[0]
+        article = {
+                "title": entry.get("title"),
+                "link": link,
+                "published": entry.get("published"),
+            }
+        articles.append(article)
+    return articles        
+
+data = []
+
 for each in URLs:
     RSS_FEED_URL = each
     # Define the time interval for checking new articles (in hours)
-    CHECK_INTERVAL_HOURS = 1
-    # Define the time interval for checking new articles (in hours)
-    CHECK_INTERVAL = timedelta(hours=CHECK_INTERVAL_HOURS)
-    
 
-    # Make the API request to get the RSS feed
-    def fetch_rss_feed(url: str) -> Optional[Dict[str, Any]]:
-        try:
-            response = requests.get(url)
-            response.raise_for_status()  # Raise an error for bad responses
-            return feedparser.parse(response.content)
-        except RequestException as e:
-            logger.error(f"Error fetching RSS feed: {e}")
-            return None
-
-    # Call the function to fetch and save the RSS feed
-    def fetch_and_store_rss_feed() -> None:
-        global allData
-        feed = fetch_rss_feed(RSS_FEED_URL)
-        if feed:
-            allData = feed
-            logger.info("RSS feed successfully fetched and stored in memory.")
-        else:
-            logger.error("Failed to fetch RSS feed.")
-        
-    fetch_and_store_rss_feed()
+    allData = fetch_and_store_rss_feed(RSS_FEED_URL)
 
     # Extract the articles from the feed
-    def extract_articles(feed: Dict[str, Any]) -> List[Dict[str, Any]]:
-        global filtered_data
-        articles = []
-        for entry in feed.get("entries", []):
-            article = {
-                "title": entry.get("title"),
-                "link": entry.get("link"),
-                "published": entry.get("published"),
-            }
-            articles.append(article)
-        return articles
 
     if allData:
-        data = extract_articles(allData)
-    else:
-        data = []
+        data.append(extract_articles(allData))
 
-    print("Total Jobs Found:", len(data))
-    print("Applying Filter with Remote, .NET and not citizen")
+data = [item for sublist in data for item in sublist]  # Flatten the list of lists
+# Remove duplicates based on the 'link' field
+unique_links = set()
+data = [article for article in data if article["link"] not in unique_links and not unique_links.add(article["link"])]
+print("Total Jobs Found:", len(data))
+print(data)
+print("Applying Filter with Remote, .NET and not citizen")
     # Load each article from the feed and check if the content contains the keyword "remote" (case insensitive)
     
-    for article in data:
+for article in data:
         # get the article link before "?" substring
-        if "?" in article["link"]:
-            article["link"] = article["link"].split("?")[0]
-        link = article["link"]
+    if "?" in article["link"]:
+        article["link"] = article["link"].split("?")[0]
+    link = article["link"]
         
         # link is in applied skip
         #print(f"Checking {link}")
         #print(f"Already applied for {applied}")
-        if link in applied:
+    if link in applied:
             #print(f"Already applied for {link}")
-            continue
-        time.sleep(2)  # Sleep for 2 seconds between requests to avoid overwhelming the server
-        res = requests.get(link)
+        continue
+    time.sleep(2)  # Sleep for 2 seconds between requests to avoid overwhelming the server
+    res = requests.get(link)
         # After 5 articles exit the loop
         # if len(filtered_data) >= 1:
         #     break
-        if res.status_code == 200:
-            content = res.text
-            if "remote" in content.lower() or "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
+    if res.status_code == 200:
+        content = res.text
+        if "remote" in content.lower() or "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
                 # content shouldn't include keyword "citizen"
-                if "citizen" in content.lower():
-                    continue
+            if "citizen" in content.lower():
+                continue
                 # content should include keyword ".net" case insensitive
-                if ".net" in content.lower():
+            if ".net" in content.lower():
                     # Print the loop count
                     
-                    title = article["title"]
-                    newtitile = title.split('<span class="sr-only">')[1].split('</span>')[0]
-                    newtitle = newtitile.replace("\n", "").strip()
-                    article["title"] = newtitle
+                title = article["title"]
+                newtitile = title.split('<span class="sr-only">')[1].split('</span>')[0]
+                newtitle = newtitile.replace("\n", "").strip()
+                article["title"] = newtitle
                     #print(newtitle)
-                    company = content.split("<title>")[1].split("</title")[0]
-                    article["company"] = company
-                    print(f"Fetching Job: {len(filtered_data)+1} : {company}")
-                    if '<figcaption class="num-applicants__caption">' in content:
-                        newContent = content.split('<figcaption class="num-applicants__caption">')[1].split('</figcaption>')[0]
+                company = content.split("<title>")[1].split("</title")[0]
+                for each in exclude:
+                    if each in company:
+                            #print(f"Excluded {company}")
+                        continue
+                article["company"] = company
+                print(f"Fetching Job: {len(filtered_data)+1} : {company}")
+                if '<figcaption class="num-applicants__caption">' in content:
+                    newContent = content.split('<figcaption class="num-applicants__caption">')[1].split('</figcaption>')[0]
+                    newContent = newContent.split('\n')[1].strip()
+                    article["applicants"] = newContent
+                        # Strip all alpha characters from the string
+                    applicantsNumber = ''.join(filter(str.isdigit, newContent))
+                    article["applicantsNumber"] = int(applicantsNumber)
+
+                else:
+                    if '<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">' in content:
+                        newContent = content.split('<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">')[1].split('</span>')[0]
                         newContent = newContent.split('\n')[1].strip()
                         article["applicants"] = newContent
-                        # Strip all alpha characters from the string
+                            # Strip all alpha characters from the string
                         applicantsNumber = ''.join(filter(str.isdigit, newContent))
                         article["applicantsNumber"] = int(applicantsNumber)
 
                     else:
-                        if '<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">' in content:
-                            newContent = content.split('<span class="num-applicants__caption topcard__flavor--metadata topcard__flavor--bullet">')[1].split('</span>')[0]
-                            newContent = newContent.split('\n')[1].strip()
-                            article["applicants"] = newContent
-                            # Strip all alpha characters from the string
-                            applicantsNumber = ''.join(filter(str.isdigit, newContent))
-                            article["applicantsNumber"] = int(applicantsNumber)
-
-                        else:
                             #print("No applicants found")
-                            article["applicants"] = "0"
-                            article["applicantsNumber"] = 0
+                        article["applicants"] = "0"
+                        article["applicantsNumber"] = 0
                             #with open("content.txt", "w", encoding="utf-8") as f:
                             #    f.write(content)
                             #exit(1)
-                    if "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
-                        article["type"] = "Local"
+                if "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
+                    article["type"] = "Local"
 
-                    else:
-                        article["type"] = "Remote"
-                    filtered_data.append(article)
+                else:
+                    article["type"] = "Remote"
+                filtered_data.append(article)
                     #print(article)
-                    continue
+                continue
                 #print(f"Article with link {link} contains 'remote'")
                 
             #else:
                 #print(f"Article with link {link} does not contain 'remote'")
                 # Remove from articles list if it does not contain "remote"
                 #data.remove(article)
-        else:
-            print(f"Failed to fetch article from {link}, status code: {res.status_code}")
+    else:
+        print(f"Failed to fetch article from {link}, status code: {res.status_code}")
         #print(f"Catured jobs so far: {len(filtered_data)}")
 
     # Remove duplicates based on the 'link' field
