@@ -345,11 +345,66 @@ def create_html_file(data: List[Dict[str, Any]], filename: str) -> None:
                         alert('An error occurred while updating visited links.');
                     }
                 }
+                async function exclude(data) {
+                    try {
+                       
+                        if (data === "") {
+                            alert('No links are marked as visited.');
+                            return;
+                        }
+
+                        // Fetch the SHA of the file from GitHub
+                        const shaResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/exclude.json', {
+                            headers: {
+                                'Authorization': atob(atob('ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3V2tkTlpVWnFXWGg1YVRkeVgwc3dPSEJXVW5CMFFYaElhWG96TkdwelQyNDRSVTlUYURsbFdub3pOblV5TjNaT1ZVRnlaelpXWm14RFRUWkpSbGhGV1c5cU5tUkhkalZQ')),
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        if (!shaResponse.ok) {
+                            alert('Failed to fetch SHA of the file.');
+                            return;
+                        }
+                        const shaData = await shaResponse.json();
+                        
+                        const appliedLinks = JSON.parse(atob(shaData.content));
+                        const fileSha = shaData.sha;
+
+                        // Update the applied links on GitHub
+                        let updatedLinks = [...new Set([data, ...appliedLinks])];
+                        //remove duplicates for updated links
+                        updatedLinks = [...new Set(updatedLinks)];
+        
+                        const updateResponse = await fetch('https://api.github.com/repos/cmounika848/potcast-generator/contents/exclude.json', {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': atob(atob('ZEc5clpXNGdaMmwwYUhWaVgzQmhkRjh4TVVKUFZGcFRNbEV3V2tkTlpVWnFXWGg1YVRkeVgwc3dPSEJXVW5CMFFYaElhWG96TkdwelQyNDRSVTlUYURsbFdub3pOblV5TjNaT1ZVRnlaelpXWm14RFRUWkpSbGhGV1c5cU5tUkhkalZQ')),
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: 'Update exclude links',
+                                content: btoa(JSON.stringify(updatedLinks)),
+                                sha: fileSha
+                            })
+                        });
+                        if (updateResponse.ok) {
+                            alert('Visited links updated successfully!');
+                        } else {
+                            alert('Failed to update visited links on GitHub.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating visited links:', error);
+                        alert('An error occurred while updating visited links.');
+                    }
+                }
             </script>
         </head>
         <body>
             <h1>Latest Remote Jobs: .NET</h1>
             <button onclick="updateVisitedLinks()">Update Visited Links</button>
+            // Add a input box and a button to header and it should alert the value of the input box
+            //create a function to create the alert after button click
+            <input type="text" id="search" placeholder="">
+            <button onclick="exclude(document.getElementById('search').value)">Search</button>
             <table>
                 <tr>
                     <th>S.No</th>
