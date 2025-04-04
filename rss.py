@@ -135,9 +135,12 @@ def fetch_and_store_rss_feed(RSS_FEED_URL) -> None:
         logger.error("Failed to fetch RSS feed.")
         return []
 
-def extract_articles(feed: Dict[str, Any]) -> List[Dict[str, Any]]:
+def extract_articles(feed: Dict[str, Any], RSS_FEED_URL) -> List[Dict[str, Any]]:
     global filtered_data
     articles = []
+    type = "Remote"
+    if "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
+        type = "Local"
     for entry in feed.get("entries", []):
         link = entry.get("link")
         if "?" in link:
@@ -146,6 +149,7 @@ def extract_articles(feed: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "title": entry.get("title"),
                 "link": link,
                 "published": entry.get("published"),
+                "type": type,
             }
         articles.append(article)
     return articles        
@@ -161,7 +165,7 @@ for each in URLs:
     # Extract the articles from the feed
 
     if allData:
-        data.append(extract_articles(allData))
+        data.append(extract_articles(allData, RSS_FEED_URL))
 
 data = [item for sublist in data for item in sublist]  # Flatten the list of lists
 # Remove duplicates based on the 'link' field
@@ -177,6 +181,8 @@ for article in data:
     if "?" in article["link"]:
         article["link"] = article["link"].split("?")[0]
     link = article["link"]
+
+    type = article["type"]
         
         # link is in applied skip
         #print(f"Checking {link}")
@@ -191,7 +197,7 @@ for article in data:
         #     break
     if res.status_code == 200:
         content = res.text
-        if "remote" in content.lower() or "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
+        if "remote" in content.lower() or type == "Local":
                 # content shouldn't include keyword "citizen"
             if "citizen" in content.lower():
                 continue
@@ -235,11 +241,8 @@ for article in data:
                             #with open("content.txt", "w", encoding="utf-8") as f:
                             #    f.write(content)
                             #exit(1)
-                if "uNTJ4RCbv385" in RSS_FEED_URL or "92qskAQ0bwAJ" in RSS_FEED_URL:
-                    article["type"] = "Local"
 
-                else:
-                    article["type"] = "Remote"
+
                 filtered_data.append(article)
                     #print(article)
                 continue
