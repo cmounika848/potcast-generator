@@ -168,7 +168,7 @@ data = [item for sublist in data for item in sublist]  # Flatten the list of lis
 unique_links = set()
 data = [article for article in data if article["link"] not in unique_links and not unique_links.add(article["link"])]
 print("Total Jobs Found:", len(data))
-print(data)
+# print(data)
 print("Applying Filter with Remote, .NET and not citizen")
     # Load each article from the feed and check if the content contains the keyword "remote" (case insensitive)
     
@@ -210,7 +210,7 @@ for article in data:
                     if each.lower() in company.lower():                     
                         continue
                 article["company"] = company
-                print(f"Fetching Job: {len(filetered_data)+1} : {company}")
+                print(f"Fetching Job : {company}")
                 if '<figcaption class="num-applicants__caption">' in content:
                     newContent = content.split('<figcaption class="num-applicants__caption">')[1].split('</figcaption>')[0]
                     newContent = newContent.split('\n')[1].strip()
